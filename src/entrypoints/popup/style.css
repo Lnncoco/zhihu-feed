@@ -1,0 +1,386 @@
+/* 设计 token：340px 弹层，密集工具面板（字阶 11/12/13/15，间距 4 倍尺，有限色板） */
+:root {
+  --bg: #ffffff;
+  --surface: #f7f8fa;
+  --surface-2: #f2f4f7;
+  --text: #16171a;
+  --text-2: #646e7d;
+  --text-3: #9aa3ad;
+  --line: #ebedf0;
+  --accent: #056de8;
+  --accent-soft: #e8f3ff;
+  --warn: #b5771f;
+  --warn-soft: #fdf3e7;
+  --track-off: #d3d8de;
+
+  --r-sm: 4px;
+  --r-md: 8px;
+  --shadow-tab: 0 1px 2px rgba(22, 23, 26, 0.08);
+  --t: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181c;
+    --surface: #1f2126;
+    --surface-2: #26292f;
+    --text: #e8eaed;
+    --text-2: #a5adb8;
+    --text-3: #737b86;
+    --line: #2c2f36;
+    --accent: #4c93f5;
+    --accent-soft: #14263d;
+    --warn: #e0a95f;
+    --warn-soft: #332716;
+    --track-off: #4a4f58;
+    --shadow-tab: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 340px;
+  font: 13px/1.45 -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== 顶栏：品牌 + 当前页提示 ===== */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 10px;
+}
+
+.brand {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.head h1 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.chip {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* ===== 页面切换器：分段控件，一次只看一页 ===== */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  margin: 0 14px;
+  padding: 2px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--t), color var(--t);
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab[aria-selected='true'] {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow-tab);
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ===== 区域分组 ===== */
+.region {
+  padding: 14px 14px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+/* ===== 开关行 ===== */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  cursor: default;
+  transition: background var(--t);
+}
+
+label.row {
+  cursor: pointer;
+}
+
+.row:hover {
+  background: var(--surface);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.line1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.line1 b {
+  font-weight: 600;
+  font-size: 12.5px;
+}
+
+.desc {
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+/* 子开关：缩进 + 连接线，让「被谁接管」一眼可读 */
+.row.child {
+  position: relative;
+  padding-left: 30px;
+}
+
+.row.child::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 50%;
+  width: 9px;
+  border-left: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-bottom-left-radius: 6px;
+}
+
+.row.child .line1 b {
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.row.child .desc {
+  color: var(--text-3);
+}
+
+.row.child.off {
+  cursor: default;
+}
+
+.row.child.off:hover {
+  background: none;
+}
+
+.row.child.off .toggle {
+  opacity: 0.4;
+}
+
+/* 被父开关接管、默认收起时的展开入口 */
+.disclose {
+  position: relative;
+  display: block;
+  width: calc(100% - 28px);
+  margin: 2px 14px 0;
+  padding: 5px 0 5px 30px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--text-3);
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--t);
+}
+
+.disclose::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 50%;
+  width: 9px;
+  border-left: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-bottom-left-radius: 6px;
+}
+
+.disclose:hover {
+  color: var(--accent);
+}
+
+.disclose:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* ===== 锚点状态标记 ===== */
+.badge {
+  flex-shrink: 0;
+  font-style: normal;
+  font-size: 10px;
+  padding: 0 5px;
+  border-radius: var(--r-sm);
+}
+
+.badge.ok {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.badge.todo {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.hits {
+  flex-shrink: 0;
+  font-style: normal;
+  font-size: 10px;
+  color: var(--text-2);
+}
+
+.hits.zero {
+  color: var(--text-3);
+}
+
+/* ===== 开关 ===== */
+.toggle {
+  appearance: none;
+  flex-shrink: 0;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--track-off);
+  position: relative;
+  cursor: pointer;
+  transition: background var(--t), opacity var(--t);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-tab);
+  transition: left var(--t);
+}
+
+.toggle:checked {
+  background: var(--accent);
+}
+
+.toggle:checked::after {
+  left: 16px;
+}
+
+.toggle:focus-visible,
+.tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== 两态文字切换（如 小字/大字） ===== */
+.seg {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.seg-opt {
+  min-width: 32px;
+  height: 18px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background var(--t), color var(--t);
+}
+
+.seg-opt[aria-checked='true'] {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow-tab);
+}
+
+.seg-opt:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.seg-opt:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 1ms !important;
+  }
+}

@@ -1,0 +1,264 @@
+/*
+ * 屏蔽样式与 DOM 锚点全部集中在本文件，由 <html data-zf-*> 属性开关控制。
+ * 开关在 switches/index.ts 里配置，JS 只负责挂/摘属性，不改动信息流 DOM。
+ * 页面归属（首页/问题页/阅读页）由 JS 按开关的 pages 判断后挂属性，CSS 不写路由条件。
+ * 「已核实」= 2026-09 经 CDP 在登录态页面实测命中。
+ */
+
+/* ===== hide-write-area：隐藏信息流顶部的「分享此刻的想法」快速发布卡 ===== */
+/* 已核实 2026-09-23：锚点 .WriteArea（Card 修饰同节点） */
+[data-zf-hide-write-area] .WriteArea {
+  display: none !important;
+}
+
+/* ===== hide-creator-center：隐藏首页侧栏「创作中心」数据卡 ===== */
+/* 已核实 2026-09-24：锚点 .CreatorEntrance */
+[data-zf-hide-creator-center] .CreatorEntrance {
+  display: none !important;
+}
+
+/* ===== hide-hot-search：隐藏侧栏「大家都在搜」热词卡 ===== */
+/* 已核实 2026-09-23：首页与问题页右侧栏热榜卡均为 .HotSearchCard */
+[data-zf-hide-hot-search] .HotSearchCard {
+  display: none !important;
+}
+
+/* ===== hide-salt-promo：隐藏首页侧栏盐选推广卡 ===== */
+/* 已核实 2026-09-24：锚点 .KfeCollection-CreateSaltCard */
+[data-zf-hide-salt-promo] .KfeCollection-CreateSaltCard {
+  display: none !important;
+}
+
+/* ===== widen-main-column：整栏收起侧栏，主栏加宽 ===== */
+/* 首页：已核实 2026-09-23：.Topstory-container 为 flex，主栏 .Topstory-mainColumn，侧栏为其二子 */
+[data-zf-widen-main-column] .Topstory-container > :not(.Topstory-mainColumn) {
+  display: none !important;
+}
+[data-zf-widen-main-column] .Topstory-container {
+  justify-content: center !important;
+}
+[data-zf-widen-main-column] .Topstory-mainColumn {
+  /* 知乎在 .Topstory-mainColumn 自身把 --container-width 覆盖成了 1000px，故写死 860 */
+  --container-width: 860px;
+  width: 860px !important;
+  max-width: none !important;
+}
+/* 问题页/阅读页：已核实 2026-09-23：.QuestionPage 下 flex 容器 = [主栏包裹层(ListShortcut 父级), .Question-sideColumn]
+   主栏保持知乎原宽（694px，正文 654px ≈ 38 字/行），只把整列居中 */
+[data-zf-widen-main-column] .Question-sideColumn {
+  display: none !important;
+}
+[data-zf-widen-main-column] .QuestionPage div:has(> .Question-sideColumn) {
+  justify-content: center !important;
+}
+[data-zf-widen-main-column] .QuestionPage div:has(> .ListShortcut) {
+  flex: 0 0 auto !important;
+}
+[data-zf-widen-main-column] .Question-mainColumn {
+  /* 写死 694：知乎默认是 calc(100% - 296px)，auto 会让"查看全部回答"页铺满 1000px 容器；
+     外层包裹 div 仍是 1000 宽，用 margin auto 把 694 列居中 */
+  width: 694px !important;
+  max-width: none !important;
+  margin-inline: auto;
+}
+/* 问题头（标题带）不在主栏内，是 PageHeader flex 的另一个子项，同样居中到 694 列 */
+[data-zf-widen-main-column] .QuestionHeader-main {
+  margin-inline: auto;
+}
+/* 滚动时吸顶的那条问题头：知乎用 padding-left:139.5 把内容按 1000px 容器摆放，
+   与收起侧栏后的居中文本列错位（标题左凹、正文右凸）。改为整条 1000px 居中，
+   内部 694 列再由 margin auto 对齐正文列。页头条（PageHeader）同样处理，否则差 8px */
+[data-zf-widen-main-column] .QuestionHeader > .QuestionHeader-content,
+[data-zf-widen-main-column] .PageHeader > .QuestionHeader-content {
+  max-width: 1000px;
+  margin-inline: auto;
+  padding-inline: 0 !important;
+}
+
+/* ===== hide-answer-author：隐藏阅读页侧栏「关于作者」卡 ===== */
+/* 已核实 2026-09-24：锚点 .AnswerAuthor */
+[data-zf-hide-answer-author] .AnswerAuthor {
+  display: none !important;
+}
+
+/* ===== hide-more-answers：问题页只留当前回答，隐藏「更多回答」列表与「查看全部回答」卡 ===== */
+/* 已核实 2026-09-23：.MoreAnswers=更多回答列表，.ViewAll=查看全部 N 个回答（页首/页尾各一） */
+[data-zf-hide-more-answers] .MoreAnswers,
+[data-zf-hide-more-answers] .ViewAll {
+  display: none !important;
+}
+
+/* ===== clean-question-header：隐藏问题头的社交按钮（关注问题/写回答/邀请/关注者） ===== */
+/* 已核实 2026-09-23：三块容器覆盖 关注问题+写回答 / 关注者+浏览数 / 邀请回答+好问题
+   2026-09-24 补：问题页 PageHeader 右侧还有 .QuestionHeader-side（已关注/写回答+关注者），
+   按钮组虽被上面规则隐藏，但空壳仍占 64px 会顶偏居中的标题列，故整块隐藏 */
+[data-zf-clean-question-header] .QuestionButtonGroup,
+[data-zf-clean-question-header] .QuestionFollowStatus,
+[data-zf-clean-question-header] .QuestionHeaderActions,
+[data-zf-clean-question-header] .QuestionHeader-side {
+  display: none !important;
+}
+
+/* ===== hide-logo：隐藏顶栏左上角知乎标识（弱化站点感） ===== */
+/* 已核实 2026-09-24：logo 是无类名的 a[href="https://www.zhihu.com"]（64×34，内含 svg），
+   与导航「推荐」的 a[href="https://www.zhihu.com/"] 差一个尾斜杠，属性精确匹配不会误伤 */
+[data-zf-hide-logo] .AppHeader a[href="https://www.zhihu.com"] {
+  display: none !important;
+}
+
+/* ===== clean-header：顶栏只留 logo（父开关，关掉后下面各子项开关才起作用） ===== */
+/* 已核实 2026-09-23：.AppHeader 内为 [A=logo, DIV=导航+搜索, DIV=右侧按钮组]，隐藏两块 DIV */
+[data-zf-clean-header] .AppHeader > div > div {
+  display: none !important;
+}
+
+/* ===== 顶栏子项：clean-header 关闭后可逐项配置（锚点 2026-09-24 首页/问题页各命中 1 个） ===== */
+/* 吸顶的 fixed 挂在 .AppHeader 的父层；改 relative 让顶栏留在文档流里随页面滚走，
+   再把知乎补位的 62px 占位 div 一并去掉，否则头部滚走后原地留一条空带（absolute 会叠压在内容上，不可取） */
+[data-zf-hdr-unstick] div:has(> .AppHeader) {
+  position: relative !important;
+}
+[data-zf-hdr-unstick] div:has(> .AppHeader) + div:has(+ main) {
+  display: none !important;
+}
+[data-zf-hdr-nav-follow] .AppHeader a[href$="/follow"],
+[data-zf-hdr-nav-recommend] .AppHeader a[href="https://www.zhihu.com/"],
+[data-zf-hdr-nav-hotlist] .AppHeader a[href$="/hot"],
+[data-zf-hdr-nav-column] .AppHeader a[href$="/column-square"],
+[data-zf-hdr-nav-ring] .AppHeader a[href$="/ring-feeds"],
+[data-zf-hdr-nav-aiworks] .AppHeader a[href$="/project-square"],
+[data-zf-hdr-nav-story] .AppHeader a[href$="/vip-web"],
+[data-zf-hdr-search] .AppHeader .SearchBar-tool,
+[data-zf-hdr-zhida] .AppHeader a[href="https://zhida.zhihu.com/"],
+[data-zf-hdr-ask] .AppHeader .SearchBar-askContainer,
+[data-zf-hdr-creator] .AppHeader a[href$="/creator"],
+[data-zf-hdr-notify] .AppHeader button[aria-label$="通知"],
+[data-zf-hdr-dm] .AppHeader button[aria-label$="私信"],
+[data-zf-hdr-avatar] .AppHeader .AppHeader-profileMenu {
+  display: none !important;
+}
+
+/* ===== hide-answer-header：阅读页（question/ID/answer/ID 型路由）顶栏与占位整体隐藏 ===== */
+/* 已核实 2026-09-24：顶栏占位 = fixed 包裹层的下一兄弟 div（62px，前有包裹层、后跟 main.App-main），
+   双侧结构锁死，不依赖知乎哈希类 */
+[data-zf-hide-answer-header] .AppHeader {
+  display: none !important;
+}
+[data-zf-hide-answer-header] div:has(> .AppHeader) + div:has(+ main) {
+  display: none !important;
+}
+
+/* ===== hide-ads：隐藏明确的广告位 ===== */
+/* 已核实 2026-09-23/24：.Pc-card=侧栏信息流广告图卡；.Question-sideColumnAdContainer=问题页侧栏广告容器；
+   .pc-article-answer-big-img=答案正文后插入的商品广告卡（sugar.zhihu.com 跳转） */
+[data-zf-hide-ads] .Pc-card,
+[data-zf-hide-ads] .Question-sideColumnAdContainer,
+[data-zf-hide-ads] .pc-article-answer-big-img {
+  display: none !important;
+}
+
+/* ===== hide-app-banner：隐藏打开客户端/登录引导浮层 ===== */
+/* 待核对：2026-09-23 登录态盘点以下三条均未命中（页面里没有该浮层）。
+   需在浮层实际出现时（疑似访客态/长文页）再抓取真实类名收敛。 */
+[data-zf-hide-app-banner] .DownloadApp,
+[data-zf-hide-app-banner] .AppBanner,
+[data-zf-hide-app-banner] .Modal--loginGuide {
+  display: none !important;
+}
+
+/* ===== hide-corner-buttons：隐藏右下角悬浮按钮组（回顶/看书等） ===== */
+/* 已核实 2026-09-23：锚点 .CornerButtons（首页 fixed 盘点命中） */
+[data-zf-hide-corner-buttons] .CornerButtons {
+  display: none !important;
+}
+
+/* ===== read-typography：阅读页排版调优 ===== */
+/* 已核实 2026-09-24：正文字号在 .RichContent-inner 与内层 .ztext 各设一次（15px/24px），只覆盖外层不生效；
+   专栏页正文是 span.RichText.ztext.Post-RichText（默认 16px/25.6px），已实测 */
+[data-zf-read-typography] .QuestionPage .RichContent-inner,
+[data-zf-read-typography] .QuestionPage .RichContent-inner .ztext,
+[data-zf-read-typography] .Post-RichText {
+  font-size: 17px;
+  line-height: 1.76;
+}
+[data-zf-read-typography] .QuestionPage .RichContent-inner p,
+[data-zf-read-typography] .Post-RichText p {
+  margin: 0 0 1.15em;
+}
+[data-zf-read-typography] .QuestionPage .QuestionHeader-title {
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+[data-zf-read-typography] .QuestionPage .AnswerItem .AuthorInfo-name {
+  font-size: 16px;
+}
+
+/* ===== read-action-bar：知乎吸底操作条改成顶部小胶囊 ===== */
+/* 已核实 2026-09-24：阅读页 .ContentItem-actions.Sticky 本身就是 fixed; bottom:0; width:694 的整宽底条；
+   专栏页吸底的是其外层 .RichContent-actions.Sticky（内嵌非 sticky 的 .ContentItem-actions），
+   两种结构都改置顶，不新增/移动 DOM */
+/* 补偿留白只在吸底条真的存在时生效：答案页关掉「更多回答」时知乎渲染的是静态操作条，
+   没有 Sticky 元素，无条件 padding 会原地留一条 46px 空带 */
+[data-zf-read-action-bar] .QuestionPage:has(.ContentItem-actions.Sticky),
+[data-zf-read-action-bar] .Post-content:has(.RichContent-actions.Sticky) {
+  padding-top: 46px !important;
+}
+[data-zf-read-action-bar] .ContentItem-actions.Sticky,
+[data-zf-read-action-bar] .RichContent-actions.Sticky {
+  position: fixed !important;
+  top: 10px !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  width: auto !important;
+  /* 专栏页的 react-sticky 包裹层自带内联 transform，居中位移必须 !important 才压得住 */
+  transform: translateX(-50%) !important;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1px;
+  height: 30px;
+  padding: 0 5px !important;
+  border: 1px solid rgba(15, 20, 28, 0.07);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 10px rgba(15, 20, 28, 0.1);
+  font-size: 12px;
+}
+/* 专栏页：内层列表本身不再带背景/占位；知乎给 .ContentItem-actions 带左右负 margin，不清掉会撑破胶囊 */
+[data-zf-read-action-bar] .RichContent-actions.Sticky .ContentItem-actions {
+  display: flex;
+  align-items: center;
+  width: auto;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+[data-zf-read-action-bar] .ContentItem-actions.Sticky .Button,
+[data-zf-read-action-bar] .RichContent-actions.Sticky .Button {
+  height: 24px;
+  min-height: 0;
+  padding: 0 7px;
+  font-size: 12px;
+  line-height: 24px;
+  color: #3b4148;
+}
+[data-zf-read-action-bar] .ContentItem-actions.Sticky .Button svg,
+[data-zf-read-action-bar] .RichContent-actions.Sticky .Button svg {
+  width: 14px;
+  height: 14px;
+}
+/* 知乎用 html[data-theme] 暴露自身主题（实测 data-theme=light） */
+html[data-theme='dark'][data-zf-read-action-bar] .ContentItem-actions.Sticky,
+html[data-theme='dark'][data-zf-read-action-bar] .RichContent-actions.Sticky {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(28, 30, 34, 0.9) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+html[data-theme='dark'][data-zf-read-action-bar] .ContentItem-actions.Sticky .Button,
+html[data-theme='dark'][data-zf-read-action-bar] .RichContent-actions.Sticky .Button {
+  color: #c9ced6;
+}
