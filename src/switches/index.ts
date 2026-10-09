@@ -341,11 +341,16 @@ export const SWITCHES: Switch[] = [
   {
     id: 'hide-corner-buttons',
     title: '悬浮按钮',
-    desc: '右下角回顶等',
+    desc: '右下角「看山」等浮钮，保留回到顶部',
     pages: ['home', 'question', 'answer', 'column', 'hot'],
     region: 'overlay',
     default: true,
-    anchors: [{ selector: '.CornerButtons', status: 'verified' }],
+    anchors: [
+      {
+        selector: '.CornerButtons > div:not(:has(> button[aria-label="回到顶部"]))',
+        status: 'verified',
+      },
+    ],
   },
   {
     id: 'read-typography',

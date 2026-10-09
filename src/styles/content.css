@@ -181,9 +181,12 @@
   display: none !important;
 }
 
-/* ===== hide-corner-buttons：隐藏右下角悬浮按钮组（回顶/看书等） ===== */
-/* 已核实 2026-09-23：锚点 .CornerButtons（首页 fixed 盘点命中） */
-[data-zf-hide-corner-buttons] .CornerButtons {
+/* ===== hide-corner-buttons：隐藏右下角悬浮按钮组，但保留「回到顶部」 ===== */
+/* 已核实 2026-10-09：滚动 1600px 后 .CornerButtons（CornerButtons--kanshan，父层 .CornerButtonsGroup）
+   只有两个直接子项——含 button[aria-label="回到顶部"] 的一条，和 button[aria-label="看山"] 的
+   .CornerAnimayedFlex--kanshanEntry。原先整组 display:none 把回顶一并带走了，故改为逐子项判定：
+   保留包着回顶按钮的那一条，其余全隐。知乎若换掉 aria-label，判定会退化成"全隐"（即旧行为），不会漏出浮钮 */
+[data-zf-hide-corner-buttons] .CornerButtons > div:not(:has(> button[aria-label='回到顶部'])) {
   display: none !important;
 }
 
