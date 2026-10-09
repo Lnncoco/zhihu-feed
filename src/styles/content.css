@@ -75,6 +75,21 @@
   padding-inline: 0 !important;
 }
 
+/* ===== feed-column-width：首页信息流列宽对齐阅读页（694 列 / 654 文本） ===== */
+/* 已核实 2026-10-09：首页 24 张推荐卡全为 .RichContent.is-collapsed（折叠预览文本仅 76~105 字，
+   是知乎在数据层截断的，.RichContent-inner 的 max-height:100px 没有裁掉任何一行，CSS 放开也变不出字）；
+   点「阅读全文」后知乎只摘掉 is-collapsed，.ContentItem 类名不变（该钩子留着备查，本规则不再用）。
+   折叠/展开两态不再分宽：两态同为 694px，与阅读页列宽一致，展开时版面不跳。
+   宽度写死 px 不用视口百分比：.Topstory-container 实测固定 1032px（border-box，左右各 16 内边距，
+   内容盒 1000px），与窗口宽度无关，百分比写法只会误导成"随屏幕变宽"。max-width:100% 是窄窗兜底。
+   多写一层 .Topstory-container 是为了压过 widen-main-column 的 860px：同为 !important，
+   靠特异性取胜而不是靠本文件里的先后顺序，两节挪动位置不会互相翻转 */
+[data-zf-feed-column-width] .Topstory-container .Topstory-mainColumn {
+  --container-width: 694px;
+  width: 694px !important;
+  max-width: 100% !important;
+}
+
 /* ===== hide-answer-author：隐藏阅读页侧栏「关于作者」卡 ===== */
 /* 已核实 2026-09-24：锚点 .AnswerAuthor */
 [data-zf-hide-answer-author] .AnswerAuthor {

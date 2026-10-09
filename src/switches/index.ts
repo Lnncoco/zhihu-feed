@@ -87,6 +87,15 @@ export const SWITCHES: Switch[] = [
     ],
   },
   {
+    id: 'feed-column-width',
+    title: '信息流宽度',
+    desc: '信息流列宽 694px，与阅读页同宽',
+    pages: ['home'],
+    region: 'content',
+    default: true,
+    anchors: [{ selector: '.Topstory-mainColumn', status: 'verified' }],
+  },
+  {
     id: 'hide-answer-author',
     title: '作者卡',
     desc: '侧栏「关于作者」',
