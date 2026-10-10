@@ -17,6 +17,8 @@ export function pageOfPathname(pathname: string): Route {
   if (/^\/question\/\d+\/answer\//.test(pathname)) return 'answer';
   if (/^\/question\/\d+/.test(pathname)) return 'question';
   if (/^\/p\/\d+/.test(pathname)) return 'column';
+  // 专栏目录页（/column/c_xxx）与专栏文章页同属「专栏页」；(\/|$) 防 /column-square 前缀撞车
+  if (/^\/column(\/|$)/.test(pathname)) return 'column';
   // 精确段匹配：/hot 与 /hot/... 才是热榜页，/hotlist 之类前缀不算
   if (/^\/hot(\/|$)/.test(pathname)) return 'hot';
   return 'other';

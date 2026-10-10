@@ -23,6 +23,12 @@ describe('pageOfPathname', () => {
     expect(pageOfPathname('/hotlist')).toBe('other');
     expect(pageOfPathname('/hot-search')).toBe('other');
   });
+
+  it('专栏目录页 /column/c_xxx 归入专栏页；/column-square 是前缀撞车（2026-10-10 定案）', () => {
+    expect(pageOfPathname('/column/c_2080690586630230647')).toBe('column');
+    expect(pageOfPathname('/column/c_123/articles')).toBe('column');
+    expect(pageOfPathname('/column-square')).toBe('other');
+  });
 });
 
 describe('pageOfUrl', () => {
