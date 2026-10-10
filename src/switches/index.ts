@@ -323,6 +323,7 @@ export const SWITCHES: Switch[] = [
       { selector: '.Pc-card', status: 'verified' },
       { selector: '.Question-sideColumnAdContainer', status: 'verified' },
       { selector: '.pc-article-answer-big-img', status: 'verified' },
+      { selector: '.pc-ylh-ad-shell', status: 'verified' },
     ],
   },
   {

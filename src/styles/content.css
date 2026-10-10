@@ -61,9 +61,14 @@
   max-width: none !important;
   margin-inline: auto;
 }
-/* 问题头（标题带）不在主栏内，是 PageHeader flex 的另一个子项，同样居中到 694 列 */
+/* 问题头（标题带）不在主栏内，是 PageHeader flex 的另一个子项，同样居中到 694 列。
+   知乎只给 padding-left:20、右边留 0，标题带内容盒因此是 674 宽，比正文列（654）右凸 20px，
+   补齐左右各 20 让两列同宽同边 */
+/* 已核实 2026-10-09 阅读页实测：.QuestionHeader-main x=293 w=694 padding=[左20 右0] →
+   标题 x=313 w=674；正文 .RichContent-inner x=313 w=654（同一列左沿，右沿差 20） */
 [data-zf-widen-main-column] .QuestionHeader-main {
   margin-inline: auto;
+  padding-inline: 20px;
 }
 /* 滚动时吸顶的那条问题头：知乎用 padding-left:139.5 把内容按 1000px 容器摆放，
    与收起侧栏后的居中文本列错位（标题左凹、正文右凸）。改为整条 1000px 居中，
@@ -166,9 +171,14 @@
 /* ===== hide-ads：隐藏明确的广告位 ===== */
 /* 已核实 2026-09-23/24：.Pc-card=侧栏信息流广告图卡；.Question-sideColumnAdContainer=问题页侧栏广告容器；
    .pc-article-answer-big-img=答案正文后插入的商品广告卡（sugar.zhihu.com 跳转） */
+/* 已核实 2026-10-09 阅读页实测：正文后商品卡换成 .pc-ylh-ad-shell（内含 .pc-ylh-ad--bigimg，
+   页脚带 .pc-ylh-ad-footer-tag=「的广告」），旧 .pc-article-answer-big-img 当日 DOM 内 0 个；
+   旧选择器保留以防知乎 A/B 回切。侧栏 .Pc-card 内的 .pc-ylh-ad--rectangle 一并覆盖 */
 [data-zf-hide-ads] .Pc-card,
 [data-zf-hide-ads] .Question-sideColumnAdContainer,
-[data-zf-hide-ads] .pc-article-answer-big-img {
+[data-zf-hide-ads] .pc-article-answer-big-img,
+[data-zf-hide-ads] .pc-ylh-ad-shell,
+[data-zf-hide-ads] .pc-ylh-ad {
   display: none !important;
 }
 
@@ -203,6 +213,13 @@
 [data-zf-read-typography] .Post-RichText p {
   margin: 0 0 1.15em;
 }
+/* 知乎编辑器把作者敲出的空行渲染成 p.ztext-empty-paragraph（盒内只有一个 br），它自身占满
+   一行行高、又吃一遍上面的段落下边距，正文里就出现 50~100px 的空洞；整块收掉后段距回到同一节奏。
+   只吃空行，不动任何文字 */
+/* 已核实 2026-10-09：阅读页某回答内 7 个，全部只在 .AnswerItem 内，块高 30 / margin-bottom 19.55 */
+[data-zf-read-typography] .ztext-empty-paragraph {
+  display: none;
+}
 [data-zf-read-typography] .QuestionPage .QuestionHeader-title {
   font-size: 22px;
   line-height: 1.4;
@@ -230,6 +247,11 @@
   left: 50% !important;
   right: auto !important;
   width: auto !important;
+  /* 知乎给操作条写了左右 -20px 外边距让它探出卡片内边距，fixed + left:50% 下这份负边距
+     会把整条左推、与正文列不同轴，置 0 才落在列中心 */
+  /* 已核实 2026-10-09：阅读页 vw1294/clientW1279 下 margin-left=-20，胶囊 center=620
+     而正文列 center=640 */
+  margin: 0 !important;
   /* 专栏页的 react-sticky 包裹层自带内联 transform，居中位移必须 !important 才压得住 */
   transform: translateX(-50%) !important;
   display: flex;
