@@ -174,7 +174,8 @@ export const SWITCHES: Switch[] = [
     desc: '文末吸底的赞同/评论/分享条',
     pages: ['column'],
     region: 'content',
-    default: true,
+    // 默认跟随知乎原生吸底显示；点暗才隐藏（2026-10-23 用户定案：操作条默认应在底部）
+    default: false,
     anchors: [{ selector: '.RichContent-actions.Sticky' }],
   },
 

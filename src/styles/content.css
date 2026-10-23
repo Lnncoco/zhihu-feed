@@ -166,11 +166,15 @@
   font-size: 16px;
 }
 
-/* ===== read-action-bar：隐藏专栏吸底操作条 ===== */
+/* ===== read-action-bar：隐藏专栏吸底操作条（默认显示，点暗才隐藏） ===== */
 /* 已核实 2026-10-23：专栏页吸底的是外层 .RichContent-actions.Sticky（带 is-bottom），
-   内嵌非 sticky 的 .ContentItem-actions；回答页已无吸底条，开关只挂专栏页。
+   react-sticky 结构为「流内占位 wrapper > inline-block 层 > .Sticky」，吸底时 .Sticky
+   拿 position:fixed 与内联 width/bottom/left；回答页已无吸底条，开关只挂专栏页。
    曾尝试「移到顶部收成胶囊」：内层按钮行 max-content 约 640px，胶囊退化成悬在顶栏下的
-   整条操作条，2026-10-23 定案回退为纯隐藏 */
+   整条操作条，同日定案删除。
+   隐藏用 visibility 而非 display:none：react-sticky 在加载时测量本条几何，display:none
+   会让之后「点亮」时吸底逻辑已死（条躺文末不吸底）；visibility 保留几何，两向切换都
+   即时等于原生。代价：隐藏且滚到文末不吸底时留一条等高空白 */
 [data-zf-read-action-bar] .RichContent-actions.Sticky {
-  display: none !important;
+  visibility: hidden !important;
 }
