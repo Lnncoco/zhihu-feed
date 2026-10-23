@@ -18,16 +18,16 @@ Chrome MV3 扩展（WXT + vanilla TS），把知乎整理成干净的新闻信�
 2. **选择器单点**：全部页面选择器只在 `src/styles/content.css`；注册表 `anchors[].selector` 只服务命中数，不驱动逻辑。
 3. **开关语义**：「开启 = 拿走标题所指的元素/行为」，标题用名词短语；`desc` 简明说明目标或结果，两态功能用 `segments` 文字切换。
 4. **面板 IA**：页面维度只有顶部 5-tab 分段切换器；命中数 =「关掉它本页会露出几处」，0 显示「无目标」。
-5. **宽度不变式**：阅读页与首页信息流列宽统一 694px（文本列 654px，折叠/展开同宽）；热榜 860px；专栏天然 654px。宽度一律写死 px，不用视口百分比。折叠预览文本是知乎在数据层截断的，CSS 变不出更多行。
+5. **宽度不变式**：阅读页与首页信息流列宽统一 694px（文本列 654px，折叠/展开同宽）；热榜 860px；专栏文章页天然 654px（目录页未实测）。宽度一律写死 px，不用视口百分比。折叠预览文本是知乎在数据层截断的，CSS 变不出更多行。
 6. **注入时序基线**：document_start + sessionStorage 快照 + 事件驱动路由。**不得回退到 document_idle 或轮询主通道**。
-7. **环境红线**：dev 端口固定 **3212**；`.dev-profile/` 持久登录目录**不可删除/提交**；WXT 只把 `content.ts`/`*.content.ts` 认作内容脚本（其他命名会被静默打成资源）。
+7. **环境红线**：dev 端口固定 **3212**；`.dev-profile/` 持久登录目录**不可删除/提交**；WXT 只把 `content.ts`/`*.content.ts` 认作内容脚本（其他命名会被静默打成资源）；dev 下面板代码由 3212 在线提供，`.output/chrome-mv3-dev/chunks/popup-*.js` 只是桩，**不要按它的时间戳/内容判 popup 新旧**（见 debugging.md）。
 8. **CSS 注释纪律**：注释内禁 `*/` 序列；每条规则标注「已核实 + 日期」。
 
 ## 单一事实源（改逻辑先收敛到这几处，别再造副本）
 
 - 加/改开关 → `src/switches/index.ts`（SWITCHES 注册表，唯一事实源）。
 - 生效/级联判定 → `src/switches/resolve.ts`（`isActive`/`suppressorOf`，content 与 popup 都调它）。
-- 在哪页 → `src/pages/index.ts`（`PAGES`/`pageOfPathname`/`trackRoute`，tab 顺序即 PAGES 数组顺序）。
+- 在哪页 → `src/pages/index.ts`（`PAGES`/`pageOfPathname`/`trackRoute`，tab 顺序即 PAGES 数组顺序；判定正则一律用 `(\/|$)` 锚段边界，防前缀撞车）。
 - 持久化 + 快照 + 消息协议 → `src/settings/`。
 - 版本号 → `package.json` 的 `version`（WXT 自动写入 manifest，勿在 wxt.config.ts 写死）。
 
@@ -53,4 +53,4 @@ npm run compile    # tsc --noEmit
 
 ## 已知缺口（用户已确认「先不支持」，勿擅自补）
 
-首页侧栏「付费咨询推广」「推荐关注」卡、专栏「关于作者」/侧栏——无稳定类名锚点；`hide-app-banner` 三个锚点仍 unverified。详见 [开发指南](docs/development.md)。
+首页侧栏「付费咨询推广」「推荐关注」卡、专栏「关于作者」/侧栏——无稳定类名锚点；专栏目录页（`/column/c_xxx`，与文章页共用 tab）只吃到全局类开关，专栏头与文章列表项无专属开关；`hide-app-banner` 三个锚点仍 unverified。详见 [开发指南](docs/development.md)。

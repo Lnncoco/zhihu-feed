@@ -2,7 +2,7 @@
 
 一个面向 Chrome 的知乎阅读扩展。它通过可回退的开关隐藏干扰区域，并用 CSS 调整阅读排版；不改写页面内容、不替用户操作，也不试图把知乎变成通用网页阅读器。
 
-适用范围：知乎首页、问题页、回答页、热榜和专栏。仅支持 Chrome MV3。
+适用范围：知乎首页、问题页、回答页、热榜，以及专栏的两种形态——文章页 `/p/N` 与目录页 `/column/c_xxx`。仅支持 Chrome MV3。
 
 ## 使用
 
@@ -22,7 +22,7 @@ npm test          # 单元测试与注册表/CSS 契约检查
 npm run build     # 生产构建
 ```
 
-`.dev-profile/` 保存开发浏览器登录态，不应删除或提交。开发产物位于 `.output/chrome-mv3-dev`；生产产物位于 `.output/chrome-mv3`。
+`.dev-profile/` 保存开发浏览器登录态，不应删除或提交。开发产物位于 `.output/chrome-mv3-dev`，生产产物位于 `.output/chrome-mv3`；dev 下面板的代码由 3212 在线提供，不在 `chrome-mv3-dev` 的 chunks 里（详见[调试手册](docs/debugging.md)）。
 
 ## 文档
 
