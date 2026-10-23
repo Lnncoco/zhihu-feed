@@ -1,20 +1,14 @@
 (() => {
   const sels = {
-    '关注': '.AppHeader a[href$="/follow"]',
-    '推荐': '.AppHeader a[href="https://www.zhihu.com/"]',
-    '热榜': '.AppHeader a[href$="/hot"]',
-    '专栏': '.AppHeader a[href$="/column-square"]',
-    '圈子': '.AppHeader a[href$="/ring-feeds"]',
-    'AIWorks': '.AppHeader a[href$="/project-square"]',
-    '故事': '.AppHeader a[href$="/vip-web"]',
-    '直答': '.AppHeader a[href="https://zhida.zhihu.com/"]',
-    '搜索框': '.AppHeader .SearchBar-tool',
-    '提问': '.AppHeader .SearchBar-askContainer',
-    '创作中心': '.AppHeader a[href$="/creator"]',
-    '通知': '.AppHeader button[aria-label$="通知"]',
-    '私信': '.AppHeader button[aria-label$="私信"]',
-    '头像': '.AppHeader .AppHeader-profileMenu',
-    '吸顶父层': 'div:has(> .AppHeader)',
+    'Logo': 'header.LeanAppHeaderBar a[aria-label="知乎"]',
+    '关注': 'header.LeanAppHeaderBar nav a[href$="/follow"]',
+    '推荐': 'header.LeanAppHeaderBar nav a[href="https://www.zhihu.com/"]',
+    '热榜': 'header.LeanAppHeaderBar nav a[href$="/hot"]',
+    '搜索框': 'header.LeanAppHeaderBar [role="search"]',
+    '创作中心': 'header.LeanAppHeaderBar a[href$="/creator"]',
+    '通知': 'header.LeanAppHeaderBar button[aria-label$="通知"]',
+    '私信': 'header.LeanAppHeaderBar button[aria-label$="私信"]',
+    '头像': 'header.LeanAppHeaderBar .AppHeader-profileMenu',
   };
   const out = {};
   for (const [k, s] of Object.entries(sels)) {
