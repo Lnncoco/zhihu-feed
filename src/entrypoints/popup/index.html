@@ -8,13 +8,34 @@
   <body>
     <header class="head">
       <span class="brand" aria-hidden="true">知</span>
-      <h1>知乎信息流</h1>
+      <div class="head-text">
+        <h1>知乎信息流</h1>
+        <p class="save-hint">改动即时保存</p>
+      </div>
       <span id="current-chip" class="chip">…</span>
     </header>
 
-    <nav class="tabs" id="tabs" role="tablist" aria-label="按页面配置"></nav>
+    <main class="layout">
+      <section class="col" data-panel="global" aria-labelledby="global-title">
+        <header class="col-head">
+          <h2 id="global-title">全站通用</h2>
+          <span id="global-count" class="col-count"></span>
+        </header>
+        <div id="global-panel" class="panel"></div>
+      </section>
 
-    <main id="panel" class="panel"></main>
+      <section class="col" data-panel="page" aria-labelledby="page-title">
+        <header class="col-head">
+          <h2 id="page-title">页面专属</h2>
+          <span class="select-wrap">
+            <select id="page-select" class="page-select" aria-label="选择页面"></select>
+          </span>
+        </header>
+        <p id="page-note" class="page-note" hidden></p>
+        <div id="page-panel" class="panel"></div>
+      </section>
+    </main>
+
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

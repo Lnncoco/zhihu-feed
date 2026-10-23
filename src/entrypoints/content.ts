@@ -59,7 +59,7 @@ export default defineContentScript({
       apply();
     });
 
-    // popup 打开时回报：逐个开关临时摘掉自己的属性再测量，得到「关掉它本页会露出几处」
+    // popup 打开时回报：逐个开关临时摘掉自己的属性再测量，得到「本页有几处目标」
     chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       if (msg?.type !== COUNTS_MSG) return;
       sendResponse(measureVisibleHits());

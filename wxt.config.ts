@@ -13,6 +13,8 @@ export default defineConfig({
     description: '减少页面干扰、提供可回退阅读排版的知乎扩展',
     // 版本不在此写死：WXT 缺省取 package.json version，保持单源
     permissions: ['storage'],
+    // popup 需要读取 active tab 的 url 并发送 counts 消息；生产 manifest 不继承 dev 的 host 授权
+    host_permissions: ['*://www.zhihu.com/*', '*://zhuanlan.zhihu.com/*'],
   },
   webExt: {
     // 持久化调试浏览器 Profile：知乎登录一次，之后 npm run dev 一直是登录态
