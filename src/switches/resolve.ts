@@ -1,11 +1,9 @@
 // 开关生效语义的唯一实现（default + 用户覆盖 + suppressedBy 级联）。
-// content script 与 popup 都必须经由这里判断，禁止本地重写级联规则——
-// 两处各写一份曾导致「面板显示」与「实际生效」有漂移风险（架构方案问题 #1）。
-import { SWITCHES, type Switch } from '@/switches';
+// content script 与 popup 都必须经由这里判断，禁止本地重写级联规则，
+// 否则「面板显示」与「实际生效」会漂移。
+import { SWITCHES, SWITCHES_BY_ID, type Switch } from '@/switches';
 import type { PageType } from '@/pages';
 import type { Overrides } from '@/settings';
-
-const byId = new Map<string, Switch>(SWITCHES.map((s) => [s.id, s]));
 
 /** 接管本开关且在本页生效的最外层父开关；无则 null。 */
 export function suppressorOf(s: Switch, overrides: Overrides, page: PageType): Switch | null {
@@ -16,7 +14,7 @@ export function suppressorOf(s: Switch, overrides: Overrides, page: PageType): S
   while (parentId) {
     if (seen.has(parentId)) return null;
     seen.add(parentId);
-    const parent = byId.get(parentId);
+    const parent = SWITCHES_BY_ID.get(parentId);
     if (!parent || !parent.pages.includes(page)) return null;
     if (!(overrides[parent.id] ?? parent.default)) return null;
     suppressor = parent;

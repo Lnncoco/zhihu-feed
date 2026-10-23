@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { PAGES } from '@/pages';
-import { REGION_ORDER, SWITCHES, type Region } from '@/switches';
+import {
+  REGION_ORDER,
+  SWITCHES,
+  SWITCHES_BY_ID,
+  isGlobalSwitch,
+  type Region,
+} from '@/switches';
 import { activeOnPage, isActive, suppressorOf } from '@/switches/resolve';
 
 const find = (id: string) => SWITCHES.find((s) => s.id === id)!;
@@ -8,14 +14,14 @@ const find = (id: string) => SWITCHES.find((s) => s.id === id)!;
 describe('isActive / suppressorOf 级联语义', () => {
   it('父在本页默认生效时，子被接管：isActive=false 且能拿到父', () => {
     const child = find('hide-hot-search');
-    const parent = find('widen-main-column');
+    const parent = find('hide-right-sidebar');
     expect(suppressorOf(child, {}, 'home')?.id).toBe(parent.id);
     expect(isActive(child, {}, 'home')).toBe(false);
   });
 
   it('用户关掉父后，子复活按自身默认值生效', () => {
     const child = find('hide-hot-search');
-    const overrides = { 'widen-main-column': false };
+    const overrides = { 'hide-right-sidebar': false };
     expect(suppressorOf(child, overrides, 'home')).toBeNull();
     expect(isActive(child, overrides, 'home')).toBe(true);
   });
@@ -24,11 +30,21 @@ describe('isActive / suppressorOf 级联语义', () => {
     expect(isActive(find('hide-hot-search'), { 'hide-hot-search': false }, 'home')).toBe(false);
   });
 
-  it('父不在本页出现时不构成接管（专栏页无 widen-main-column）', () => {
-    const child = find('hide-hot-search');
-    expect(child.pages).toContain('column');
-    expect(find('widen-main-column').pages).not.toContain('column');
+  it('父不在本页出现时不构成接管（合成父开关仅挂首页）', () => {
+    const child = {
+      ...find('hide-hot-search'),
+      id: 'synthetic-child',
+      suppressedBy: 'hide-write-area',
+    };
+    expect(find('hide-write-area').pages).not.toContain('column');
+    expect(suppressorOf(child, {}, 'column')).toBeNull();
     expect(isActive(child, {}, 'column')).toBe(true);
+  });
+
+  it('右侧栏在专栏文章页同样接管热词卡与作者卡', () => {
+    expect(find('hide-right-sidebar').pages).toContain('column');
+    expect(suppressorOf(find('hide-hot-search'), {}, 'column')?.id).toBe('hide-right-sidebar');
+    expect(suppressorOf(find('hide-answer-author'), {}, 'column')?.id).toBe('hide-right-sidebar');
   });
 
   it('activeOnPage 与逐项 isActive 一致', () => {
@@ -49,6 +65,13 @@ describe('注册表自检', () => {
   it('id 唯一且为 kebab-case', () => {
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) expect(id).toMatch(/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/);
+  });
+
+  it('isGlobalSwitch 只认五页全覆盖，索引与注册表一致', () => {
+    expect(isGlobalSwitch(find('hide-logo'))).toBe(true);
+    expect(isGlobalSwitch(find('hide-write-area'))).toBe(false);
+    expect(SWITCHES_BY_ID.size).toBe(SWITCHES.length);
+    expect(SWITCHES_BY_ID.get('hide-logo')).toBe(find('hide-logo'));
   });
 
   it('suppressedBy 指向存在的开关，且父 title 可用于面板文案', () => {
@@ -75,7 +98,7 @@ describe('注册表自检', () => {
     }
   });
 
-  it('pages/region/anchors/status 字段合法', () => {
+  it('pages/region/anchors 字段合法', () => {
     for (const s of SWITCHES) {
       expect(s.pages.length).toBeGreaterThan(0);
       for (const p of s.pages) expect(pages.has(p)).toBe(true);
@@ -83,7 +106,6 @@ describe('注册表自检', () => {
       expect(s.anchors.length).toBeGreaterThan(0);
       for (const a of s.anchors) {
         expect(a.selector.trim().length).toBeGreaterThan(0);
-        expect(['verified', 'unverified']).toContain(a.status);
       }
     }
   });
