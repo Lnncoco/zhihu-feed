@@ -2,7 +2,7 @@
   "name": "zhihu-feed",
   "description": "减少页面干扰、提供可回退阅读排版的知乎扩展",
   "private": true,
-  "version": "0.3.1",
+  "version": "0.6.6",
   "type": "module",
   "scripts": {
     "dev": "wxt",
