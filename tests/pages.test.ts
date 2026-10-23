@@ -5,6 +5,7 @@ describe('pageOfPathname', () => {
   it('识别五类页面', () => {
     expect(pageOfPathname('/')).toBe('home');
     expect(pageOfPathname('')).toBe('home');
+    expect(pageOfPathname('/follow')).toBe('home');
     expect(pageOfPathname('/question/39942538')).toBe('question');
     expect(pageOfPathname('/question/39942538/answer/1234567')).toBe('answer');
     expect(pageOfPathname('/p/123456')).toBe('column');
@@ -14,9 +15,14 @@ describe('pageOfPathname', () => {
 
   it('非信息页面与其他路径判为 other', () => {
     expect(pageOfPathname('/topic')).toBe('other');
-    expect(pageOfPathname('/follow')).toBe('other');
     expect(pageOfPathname('/question/abc')).toBe('other');
     expect(pageOfPathname('/p/abc')).toBe('other');
+  });
+
+  it('数字段也锚段边界，前缀撞车不算（2026-10-23 收紧）', () => {
+    expect(pageOfPathname('/question/123abc')).toBe('other');
+    expect(pageOfPathname('/p/123abc')).toBe('other');
+    expect(pageOfPathname('/followed')).toBe('other');
   });
 
   it('/hot 精确段匹配，前缀撞车路径判 other（2026-09-28 定案）', () => {
