@@ -10,10 +10,10 @@
 
 | 规则 | 原因 |
 | --- | --- |
-| JS 只在 `<html>` 切换 `data-zf-<id>` | 页面行为与样式分离，不破坏知乎 DOM |
+| JS 只在 `<html>` 切换 `data-zf-<id>`；数值项只写 `--zf-<id>` | 页面行为与样式分离，不破坏知乎 DOM |
 | 页面选择器只在 `src/styles/content.css` | 改版时有一个可检查的修复点 |
 | `SWITCHES` 是开关元数据的唯一来源 | popup 与 content 不复制开关、页面或级联逻辑 |
-| `resolve.ts` 决定有效开关 | 设置面板与页面不会对父子接管产生不同理解 |
+| `resolve.ts` 决定有效开关与数值 | 设置面板与页面不会对父子接管或参数取值产生不同理解 |
 | document_start + localStorage 快照 + 路由事件 | 首帧尽早生效，SPA 切换不依赖轮询 |
 
 ## 模块职责
@@ -35,9 +35,9 @@ popup 的三个模块职责固定：`main.ts` 持有页面/设置状态并编排
 ```text
 content document_start
   注入内联 CSS
-  -> 读取 localStorage 快照并按当前路径切换属性
+  -> 读取 localStorage 快照（overrides + params）并按当前路径切换属性/变量
   -> 订阅 MAIN world 的 zf-route-change
-  -> 异步读取 storage.sync 权威设置并更新快照/属性
+  -> 异步读取 storage.sync 权威设置（overrides + params）并更新快照/属性
 
 popup
   读取当前 tab URL，确定当前页与命中数来源
@@ -48,7 +48,7 @@ popup
 
 `router.content.ts` 在 MAIN world 包装 `pushState`、`replaceState` 并监听 `popstate`。它只广播事件；isolated world 自行读取 `location.pathname`，避免跨 world 传递页面数据。
 
-所有存储读取都经过 `sanitizeOverrides`：已删除或改名的开关键在读取时被丢弃，下一次通过面板写回时自然清除；读取路径不主动回写，避免和多端同步写入抢时序。
+所有存储读取都经过 `sanitizeOverrides` / `sanitizeParams`：已删除或改名的键在读取时被丢弃，数值会按 `range` 收敛；下一次通过面板写回时自然清除旧键。读取路径不主动回写，避免和多端同步写入抢时序。
 
 ## 关键选择
 
@@ -63,6 +63,12 @@ popup
 ### 级联关系
 
 `suppressedBy` 表示父开关生效时接管子开关。关系必须是同分区、无环的树；解析层找出实际接管者，popup 以嵌套行展示后代。父开关生效时子项禁用，并在分组顶部提示接管来源；关闭父开关后恢复细粒度控制。
+
+### 数值参数与布尔开关分离
+
+隐藏类开关仍是布尔 `overrides`；尺寸类调节项存 `params`，key 为开关 id。注册表的 `range` 是范围、步进与默认值的唯一来源，`resolve.rangeValue` 是有效值的唯一实现。content 只把值写成 `<html>` 上的 `--zf-<id>`，CSS 用 `var()` 消费；不新增 DOM 结构，页面切换时移除变量。滑块上限挡位表示不限制（图片宽度取 720px，不小于正文列 704px），因此滑块本身承担启用与停用，不再叠加布尔开关。
+
+popup 拖动滑块时先更新本地状态与数值显示，拖动中按 250ms 静默节流写入 `storage.sync`，松手立即写；popup 关闭时 flush。
 
 ### 页面判定按段边界收口
 

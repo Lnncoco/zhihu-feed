@@ -14,9 +14,9 @@ Chrome MV3 扩展（WXT + vanilla TS），把知乎整理成干净的新闻信�
 
 ## 不可违反的约束（违反 = 返工，完整解释见 architecture.md）
 
-1. **属性门控**：JS 只在 `<html>` 挂/摘 `data-zf-<id>`；禁止改知乎 DOM、禁止自动点击、禁止注入可见 UI 到页面。
+1. **属性门控**：JS 只在 `<html>` 挂/摘 `data-zf-<id>`，数值项只写 `--zf-<id>` 变量；禁止改知乎 DOM 结构、禁止自动点击、禁止注入可见 UI 到页面。
 2. **选择器单点**：全部页面选择器只在 `src/styles/content.css`；注册表 `anchors[].selector` 只服务命中数，不驱动逻辑。
-3. **开关语义**：「开启 = 拿走标题所指的元素/行为」，标题用名词短语；`desc` 简明说明目标或结果，两态功能用 `segments` 文字切换。
+3. **开关语义**：「开启 = 拿走标题所指的元素/行为」，标题用名词短语；`desc` 简明说明目标或结果，两态功能用 `segments` 文字切换，数值项用 `range` 滑块（图片宽度拖到最大 = 原文宽度）。
 4. **面板 IA**：左列「全站通用」固定显示五页共用开关，右列「页面专属」用页面选择器切换并以当前页为默认；同类项按区域折叠。面板亮暗 = 显示/隐藏（存储与属性层仍是 hide 语义，面板取反映射）；命中数 =「本页有几处该目标」，0 显示「无目标」；非当前页不显示命中数。
 5. **宽度不变式**：不改写知乎自然列宽——首页/热榜主栏 784px（文本卡 704px），问题/回答/专栏正文列 704px。收起左右侧栏后主列在 1104px 内容区内居中，问题头收窄到 704px 与正文同轴。需要约束的尺寸一律写死 px，不用视口百分比。折叠预览文本是知乎在数据层截断的，CSS 变不出更多行。
 6. **注入时序基线**：document_start + localStorage 快照（跨标签共享，新标签首帧也有值）+ 事件驱动路由。**不得回退到 document_idle 或轮询主通道**。
@@ -26,6 +26,7 @@ Chrome MV3 扩展（WXT + vanilla TS），把知乎整理成干净的新闻信�
 ## 单一事实源（改逻辑先收敛到这几处，别再造副本）
 
 - 加/改开关 → `src/switches/index.ts`（SWITCHES 注册表与 `SWITCHES_BY_ID`/`isGlobalSwitch`，唯一事实源）。
+- 数值项范围与默认值 → 注册表的 `range`；有效值 → `src/switches/resolve.ts` 的 `rangeValue`；数值持久化/快照 → `src/settings/` 的 `params`（与布尔 `overrides` 分离）。
 - 生效/级联判定 → `src/switches/resolve.ts`（`isActive`/`suppressorOf`，content 与 popup 都调它）。
 - 在哪页 → `src/pages/index.ts`（`PAGES`/`pageOfPathname`/`trackRoute`，页面选择器选项顺序即 PAGES 数组顺序；判定正则一律用 `(\/|$)` 锚段边界，防前缀撞车）。
 - 持久化 + 快照 + 消息协议 → `src/settings/`。
