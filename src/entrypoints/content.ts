@@ -2,18 +2,24 @@
 // 持久化在 @/settings，生效语义在 @/switches/resolve，本文件不实现任何业务规则。
 import cssText from '@/styles/content.css?inline';
 import { SWITCHES } from '@/switches';
-import { activeOnPage } from '@/switches/resolve';
+import { activeOnPage, rangeValue } from '@/switches/resolve';
 import {
   getOverrides,
+  getParams,
   onOverridesChanged,
+  onParamsChanged,
+  readParamsSnapshot,
   readSnapshot,
+  writeParamsSnapshot,
   writeSnapshot,
   type Overrides,
+  type Params,
 } from '@/settings';
 import { COUNTS_MSG, type CountsResponse } from '@/settings/messages';
 import { pageOfPathname, trackRoute, type PageType, type Route } from '@/pages';
 
 let overrides: Overrides = {};
+let params: Params = {};
 let route: Route = 'other';
 
 function apply(): void {
@@ -21,7 +27,15 @@ function apply(): void {
   const page: PageType | null = route === 'other' ? null : route;
   const activeIds = new Set(page ? activeOnPage(overrides, page).map((s) => s.id) : []);
   for (const s of SWITCHES) {
-    root.toggleAttribute(`data-zf-${s.id}`, activeIds.has(s.id));
+    const active = activeIds.has(s.id);
+    root.toggleAttribute(`data-zf-${s.id}`, active);
+    if (!s.range) continue;
+    const value = active ? rangeValue(s, params) : null;
+    if (value !== null) {
+      root.style.setProperty(`--zf-${s.id}`, `${value}${s.range.unit}`);
+    } else {
+      root.style.removeProperty(`--zf-${s.id}`);
+    }
   }
 }
 
@@ -41,6 +55,7 @@ export default defineContentScript({
 
     // 同步路径：快照（冷启动无快照则按注册表默认值）先挂属性，不等任何 await
     overrides = readSnapshot() ?? {};
+    params = readParamsSnapshot() ?? {};
     route = pageOfPathname(location.pathname);
     // 先安装事件监听再等待 storage，避免这段异步窗口里的 SPA 跳转漏报。
     // trackRoute 会立即以快照状态 apply 一次，保持 document_start 的首帧路径。
@@ -50,12 +65,18 @@ export default defineContentScript({
     });
 
     // 异步对齐：storage.sync 是权威值，覆盖后留档给本标签页下次导航
-    overrides = await getOverrides();
+    [overrides, params] = await Promise.all([getOverrides(), getParams()]);
     writeSnapshot(overrides);
+    writeParamsSnapshot(params);
     apply();
     onOverridesChanged((o) => {
       overrides = o;
       writeSnapshot(o);
+      apply();
+    });
+    onParamsChanged((p) => {
+      params = p;
+      writeParamsSnapshot(p);
       apply();
     });
 

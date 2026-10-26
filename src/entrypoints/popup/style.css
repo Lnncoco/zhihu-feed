@@ -408,6 +408,43 @@ body::-webkit-scrollbar-thumb {
   justify-self: end;
 }
 
+/* 数值项滑块独占第二行，避免和标题、命中数挤在一行 */
+.row > .range {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 2px;
+}
+
+.range-input {
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.range-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.range-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.range-val {
+  min-width: 38px;
+  color: var(--text-2);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 .children {
   margin-left: 14px;
   padding-left: 10px;

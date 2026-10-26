@@ -7,6 +7,15 @@ export interface Anchor {
 /** 页面区域，popup 按此分区排列（自上而下的阅读顺序） */
 export type Region = 'header' | 'content' | 'sidebar' | 'overlay';
 
+/** 数值型调节项的取值范围；值通过 <html> 上的 --zf-<id> 变量传给 CSS */
+export interface RangeSpec {
+  min: number;
+  max: number;
+  step: number;
+  default: number;
+  unit: string;
+}
+
 export interface Switch {
   /** 对应 <html> 上的 data-zf-<id> 属性开关，content.css 规则按此生效 */
   id: string;
@@ -23,6 +32,8 @@ export interface Switch {
   suppressedBy?: string;
   /** 有值时面板用两态文字切换代替开关（语义直接写在控件上，适用于排版密度这类两可状态） */
   segments?: { off: string; on: string };
+  /** 有值时面板用滑块调节，值存 params 而非布尔 overrides */
+  range?: RangeSpec;
 }
 
 export const REGION_TITLES: Record<Region, string> = {
@@ -169,6 +180,26 @@ export const SWITCHES: Switch[] = [
     segments: { off: '小字', on: '大字' },
   },
   {
+    id: 'limit-image-width',
+    title: '图片宽度',
+    desc: '正文与文章封面最大宽度，超出按比例缩小',
+    pages: ['home', 'question', 'answer', 'column', 'hot'],
+    region: 'content',
+    // 参数默认即生效；上限 720px 不小于正文列 704px，拖到最大等价于不限制
+    default: true,
+    anchors: [
+      {
+        selector:
+          '.RichContent-inner img, .RichText img, .QuestionRichText img, .Post-RichText img',
+      },
+      {
+        selector:
+          '.ContentItem.ArticleItem .RichContent > div > div > img[width="100%"][height="100%"]',
+      },
+    ],
+    range: { min: 160, max: 720, step: 20, default: 320, unit: 'px' },
+  },
+  {
     id: 'read-action-bar',
     title: '底部操作条',
     desc: '文末吸底的赞同/评论/分享条',
@@ -292,4 +323,9 @@ export const SWITCHES_BY_ID: ReadonlyMap<string, Switch> = new Map(
 /** 五类页面全覆盖的开关进入面板左列「全站通用」 */
 export function isGlobalSwitch(s: Switch): boolean {
   return PAGES.every((p) => s.pages.includes(p.id));
+}
+
+/** 隐藏/收起类开关：参与亮暗与「已隐藏」计数；排版与尺寸调节项不计入 */
+export function isHideLike(s: Switch): boolean {
+  return !s.segments && !s.range;
 }

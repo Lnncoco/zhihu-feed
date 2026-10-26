@@ -3,7 +3,7 @@
 // 否则「面板显示」与「实际生效」会漂移。
 import { SWITCHES, SWITCHES_BY_ID, type Switch } from '@/switches';
 import type { PageType } from '@/pages';
-import type { Overrides } from '@/settings';
+import type { Overrides, Params } from '@/settings';
 
 /** 接管本开关且在本页生效的最外层父开关；无则 null。 */
 export function suppressorOf(s: Switch, overrides: Overrides, page: PageType): Switch | null {
@@ -32,4 +32,9 @@ export function isActive(s: Switch, overrides: Overrides, page: PageType): boole
 /** 该页全部生效开关（content script 挂属性用） */
 export function activeOnPage(overrides: Overrides, page: PageType): Switch[] {
   return SWITCHES.filter((s) => s.pages.includes(page) && isActive(s, overrides, page));
+}
+
+/** 数值项的有效值：用户值优先，缺省回注册表默认；非数值项返回 null */
+export function rangeValue(s: Switch, params: Params): number | null {
+  return s.range ? (params[s.id] ?? s.range.default) : null;
 }

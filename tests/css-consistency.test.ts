@@ -39,6 +39,13 @@ describe('注册表 ↔ content.css 一致性', () => {
     }
   });
 
+  it('数值项的 CSS 变量缺省值与注册表默认值一致（防两处漂移）', () => {
+    for (const s of SWITCHES.filter((x) => x.range)) {
+      const expected = `var(--zf-${s.id}, ${s.range!.default}${s.range!.unit})`;
+      expect(css.includes(expected), `缺少 ${expected}`).toBe(true);
+    }
+  });
+
   it('注释定界符配平（防未闭合注释吞规则——历史事故 L3）', () => {
     const opens = (css.match(/\/\*/g) ?? []).length;
     const closes = (css.match(/\*\//g) ?? []).length;

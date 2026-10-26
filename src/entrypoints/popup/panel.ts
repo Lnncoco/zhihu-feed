@@ -6,26 +6,30 @@ import {
   REGION_TITLES,
   SWITCHES_BY_ID,
   isGlobalSwitch,
+  isHideLike,
   type Region,
   type Switch,
 } from '@/switches';
-import { isActive, suppressorOf } from '@/switches/resolve';
-import type { Overrides } from '@/settings';
+import { isActive, rangeValue, suppressorOf } from '@/switches/resolve';
+import type { Overrides, Params } from '@/settings';
 
 export type PanelKind = 'global' | 'page';
 
 export interface PanelState {
   overrides: Overrides;
+  params: Params;
   currentPage: PageType | 'other';
   selectedPage: PageType;
 }
 
 type ToggleHandler = (id: string, value: boolean) => void;
+type RangeHandler = (id: string, value: number, immediate?: boolean) => void;
 
 interface RenderContext {
   state: PanelState;
   page: PageType;
   onToggle: ToggleHandler;
+  onParam: RangeHandler;
 }
 
 /** 面板按哪一页判定生效：全站列跟随当前页，页面列跟随选择器 */
@@ -134,9 +138,39 @@ function segControl(f: Switch, ctx: RenderContext): HTMLElement {
   return wrap;
 }
 
+/** 数值项：滑块即时写回 params，上限挡位由 CSS 自然等价于不限制 */
+function rangeControl(f: Switch, ctx: RenderContext): HTMLElement {
+  const spec = f.range!;
+  const wrap = document.createElement('span');
+  wrap.className = 'range';
+
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.className = 'range-input';
+  input.min = String(spec.min);
+  input.max = String(spec.max);
+  input.step = String(spec.step);
+  const current = rangeValue(f, ctx.state.params) ?? spec.default;
+  input.value = String(current);
+  const tip = `${f.title}：${f.desc}`;
+  input.title = tip;
+  input.setAttribute('aria-label', tip);
+  input.setAttribute('aria-valuetext', `${current}${spec.unit}`);
+  input.addEventListener('input', () => ctx.onParam(f.id, Number(input.value)));
+  // 松手立即写权威值；拖动中的 input 只走节流
+  input.addEventListener('change', () => ctx.onParam(f.id, Number(input.value), true));
+
+  const value = document.createElement('output');
+  value.className = 'range-val';
+  value.textContent = `${current}${spec.unit}`;
+
+  wrap.append(input, value);
+  return wrap;
+}
+
 function rowEl(f: Switch, nested: boolean, ctx: RenderContext): HTMLElement {
-  // label 会把行内点击转发给第一个可标记控件（button 也算），两态切换行改用 div 避免误触
-  const el = document.createElement(f.segments ? 'div' : 'label');
+  // label 会把行内点击转发给第一个可标记控件（button 也算），两态/数值行改用 div 避免误触
+  const el = document.createElement(f.segments || f.range ? 'div' : 'label');
   el.className = nested ? 'row nested' : 'row';
   el.dataset.switchId = f.id;
 
@@ -176,7 +210,12 @@ function rowEl(f: Switch, nested: boolean, ctx: RenderContext): HTMLElement {
   hits.dataset.id = f.id;
   hits.hidden = true;
 
-  el.append(info, hits, f.segments ? segControl(f, ctx) : toggleControl(f, ctx));
+  const control = f.range
+    ? rangeControl(f, ctx)
+    : f.segments
+      ? segControl(f, ctx)
+      : toggleControl(f, ctx);
+  el.append(info, hits, control);
   return el;
 }
 
@@ -202,8 +241,9 @@ export function renderPanel(
   kind: PanelKind,
   state: PanelState,
   onToggle: ToggleHandler,
+  onParam: RangeHandler,
 ): void {
-  const ctx: RenderContext = { state, page: effectivePage(kind, state), onToggle };
+  const ctx: RenderContext = { state, page: effectivePage(kind, state), onToggle, onParam };
   container.textContent = '';
 
   for (const region of REGION_ORDER) {
@@ -261,6 +301,15 @@ export function refreshPanel(panel: HTMLElement, kind: PanelKind, state: PanelSt
         btn.disabled = suppressor !== null;
       }
     }
+    const range = el.querySelector<HTMLInputElement>('.range-input');
+    if (range && f.range) {
+      const value = rangeValue(f, state.params) ?? f.range.default;
+      range.value = String(value);
+      range.disabled = suppressor !== null;
+      range.setAttribute('aria-valuetext', `${value}${f.range.unit}`);
+      const out = el.querySelector<HTMLOutputElement>('.range-val');
+      if (out) out.textContent = `${value}${f.range.unit}`;
+    }
     const takeover = el.querySelector<HTMLElement>('.takeover');
     if (takeover) {
       takeover.hidden = suppressor === null;
@@ -295,18 +344,24 @@ function refreshGroups(
   for (const details of panel.querySelectorAll<HTMLDetailsElement>('.group')) {
     const items = [...details.querySelectorAll<HTMLElement>('[data-switch-id]')];
     let active = 0;
+    let total = 0;
     let suppressor: Switch | null = null;
     for (const el of items) {
       const f = SWITCHES_BY_ID.get(el.dataset.switchId ?? '');
       if (!f) continue;
-      if (isActive(f, state.overrides, page)) active++;
+      if (isHideLike(f)) {
+        total++;
+        if (isActive(f, state.overrides, page)) active++;
+      }
       if (!suppressor) suppressor = suppressorOf(f, state.overrides, page);
     }
 
     const count = details.querySelector<HTMLElement>('.group-count');
     if (count) {
-      count.textContent = `${active}/${items.length}`;
-      count.title = `已隐藏 ${active} 项，共 ${items.length} 项`;
+      // 整组只有调节项时不显示「已隐藏」徽标，避免出现无意义的空计数
+      count.hidden = total === 0;
+      count.textContent = total ? `${active}/${total}` : '';
+      count.title = total ? `已隐藏 ${active} 项，共 ${total} 项` : '';
     }
 
     const hint = details.querySelector<HTMLElement>('.hint');

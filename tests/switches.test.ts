@@ -5,9 +5,10 @@ import {
   SWITCHES,
   SWITCHES_BY_ID,
   isGlobalSwitch,
+  isHideLike,
   type Region,
 } from '@/switches';
-import { activeOnPage, isActive, suppressorOf } from '@/switches/resolve';
+import { activeOnPage, isActive, rangeValue, suppressorOf } from '@/switches/resolve';
 
 const find = (id: string) => SWITCHES.find((s) => s.id === id)!;
 
@@ -115,5 +116,32 @@ describe('注册表自检', () => {
       expect(s.title).not.toMatch(/^(取消|精简|开启|关闭|置顶)/);
       expect(s.title.length).toBeGreaterThan(0);
     }
+  });
+
+  it('range 配置合法：与 segments 互斥，默认值在范围内且对齐 step', () => {
+    for (const s of SWITCHES.filter((x) => x.range)) {
+      expect(s.segments).toBeUndefined();
+      const r = s.range!;
+      expect(r.min).toBeLessThan(r.max);
+      expect(r.step).toBeGreaterThan(0);
+      expect(r.default).toBeGreaterThanOrEqual(r.min);
+      expect(r.default).toBeLessThanOrEqual(r.max);
+      expect((r.default - r.min) % r.step).toBe(0);
+    }
+  });
+
+  it('rangeValue 缺省回默认值，有用户值时取用户值', () => {
+    const s = find('limit-image-width');
+    expect(isGlobalSwitch(s)).toBe(true);
+    expect(s.anchors).toHaveLength(2);
+    expect(rangeValue(s, {})).toBe(320);
+    expect(rangeValue(s, { 'limit-image-width': 360 })).toBe(360);
+    expect(rangeValue(find('hide-ads'), {})).toBeNull();
+  });
+
+  it('isHideLike 只认隐藏类，排版与尺寸调节项不参与已隐藏计数', () => {
+    expect(isHideLike(find('hide-ads'))).toBe(true);
+    expect(isHideLike(find('read-typography'))).toBe(false);
+    expect(isHideLike(find('limit-image-width'))).toBe(false);
   });
 });

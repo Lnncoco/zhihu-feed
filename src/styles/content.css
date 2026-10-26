@@ -166,6 +166,41 @@
   font-size: 16px;
 }
 
+/* ===== limit-image-width：正文图片最大宽度按固定 px 缩放 ===== */
+/* 已核实 2026-10-26：首页信息流「阅读全文」展开后的 .RichContent-inner img、问题页回答图与
+   专栏 .Post-RichText img 都按滑块收窄（320px 档实测 320px，160px 档实测 160px）。
+   只缩正文容器内的 img，不改图文容器与列宽。
+   height:auto 覆盖知乎写在 img 上的宽高属性；min(…, 100%) 防窄窗口横向溢出。 */
+[data-zf-limit-image-width] .RichContent-inner img,
+[data-zf-limit-image-width] .RichText img,
+[data-zf-limit-image-width] .QuestionRichText img,
+[data-zf-limit-image-width] .Post-RichText img {
+  max-width: min(var(--zf-limit-image-width, 320px), 100%) !important;
+  height: auto !important;
+}
+/* 已核实 2026-10-26：信息流 .ContentItem.ArticleItem 展开后的头图结构是
+   「.RichContent > div（padding-bottom 撑高）> div（绝对定位 704x440）> img 宽高各 100%」，
+   不在 .RichContent-inner 内；只收 img 会让外层仍占 440px 形成空白。三层一起改成流内等比：
+   320px 档实测 320x218、头图与正文间距 9px；160px 档 160x109；720px 档宽 704（原文宽）。
+   仅认 article 卡片的这组宽高属性，视频卡与其他封面不匹配。 */
+[data-zf-limit-image-width] .ContentItem.ArticleItem .RichContent > div:has(> div > img[width='100%'][height='100%']) {
+  width: min(var(--zf-limit-image-width, 320px), 100%) !important;
+  height: auto !important;
+  padding-bottom: 0 !important;
+}
+[data-zf-limit-image-width] .ContentItem.ArticleItem .RichContent > div > div:has(> img[width='100%'][height='100%']) {
+  position: static !important;
+  width: 100% !important;
+  height: auto !important;
+}
+[data-zf-limit-image-width] .ContentItem.ArticleItem .RichContent > div > div > img[width='100%'][height='100%'] {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: none !important;
+}
+
 /* ===== read-action-bar：隐藏专栏吸底操作条（默认显示，点暗才隐藏） ===== */
 /* 已核实 2026-10-23：专栏页吸底的是外层 .RichContent-actions.Sticky（带 is-bottom），
    react-sticky 结构为「流内占位 wrapper > inline-block 层 > .Sticky」，吸底时 .Sticky
