@@ -234,6 +234,7 @@ export const SWITCHES: Switch[] = [
         selector:
           '.Post-content > div > div:has(.Card.AuthorCard), .Post-content > div > div:has(.HotSearchCard)',
       },
+      { selector: 'div:has(> main.App-main) + aside' },
     ],
   },
   {

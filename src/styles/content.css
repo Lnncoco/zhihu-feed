@@ -57,6 +57,18 @@
 [data-zf-hide-right-sidebar] .Post-content > div {
   justify-content: center !important;
 }
+/* 搜索页同样是 [左导航 + 784 主列 + 320 侧栏]，但主列不在 Topstory-container 里：
+   侧栏是主列容器的相邻 aside；直接收起后主列会撑到 1104 并靠左，需锁回 784 居中 */
+/* 已核实 2026-10-28：搜索页侧栏为主列容器的相邻 aside（320）；收起后主列锁 784 居中，
+   左导航显隐都不改主列自然宽，侧栏可随时恢复 */
+[data-zf-hide-right-sidebar] main.App-main:has(.SearchMain) {
+  width: 784px !important;
+  max-width: 100% !important;
+  margin-inline: auto !important;
+}
+[data-zf-hide-right-sidebar] div:has(> main.App-main) + aside {
+  display: none !important;
+}
 /* 问题头是主栏之外的独立块（知乎给 1104 宽 + 左右 40 内边距）。侧栏收起后收窄到
    正文自然宽 704 并居中，让标题、标签、摘要与主列同轴；padding 置 0 后 h1 左沿 = 正文左沿 */
 /* 已核实 2026-10-23：问题/回答页 h1 块 1104，主列 704 */

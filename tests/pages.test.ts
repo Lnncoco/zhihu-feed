@@ -6,6 +6,8 @@ describe('pageOfPathname', () => {
     expect(pageOfPathname('/')).toBe('home');
     expect(pageOfPathname('')).toBe('home');
     expect(pageOfPathname('/follow')).toBe('home');
+    expect(pageOfPathname('/search')).toBe('home');
+    expect(pageOfPathname('/search/')).toBe('home');
     expect(pageOfPathname('/question/39942538')).toBe('question');
     expect(pageOfPathname('/question/39942538/answer/1234567')).toBe('answer');
     expect(pageOfPathname('/p/123456')).toBe('column');
@@ -23,6 +25,7 @@ describe('pageOfPathname', () => {
     expect(pageOfPathname('/question/123abc')).toBe('other');
     expect(pageOfPathname('/p/123abc')).toBe('other');
     expect(pageOfPathname('/followed')).toBe('other');
+    expect(pageOfPathname('/searching')).toBe('other');
   });
 
   it('/hot 精确段匹配，前缀撞车路径判 other（2026-09-28 定案）', () => {

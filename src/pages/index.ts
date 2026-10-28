@@ -16,6 +16,8 @@ export function pageOfPathname(pathname: string): Route {
   if (pathname === '/' || pathname === '') return 'home';
   // 关注页 /follow 与首页同构（Topstory 主栏 + 右侧栏），并入首页类；(\/|$) 防 /followed 之类前缀撞车
   if (/^\/follow(\/|$)/.test(pathname)) return 'home';
+  // 搜索页 /search 也是 [左导航 + 784 主列 + 320 右侧栏]，并入首页类；(\/|$) 防 /searching 前缀撞车
+  if (/^\/search(\/|$)/.test(pathname)) return 'home';
   // 数字段一律以 (\d+) 收尾并锚段边界，防 /question/123abc 这类前缀撞车
   if (/^\/question\/\d+\/answer\/\d+(\/|$)/.test(pathname)) return 'answer';
   if (/^\/question\/\d+(\/|$)/.test(pathname)) return 'question';
